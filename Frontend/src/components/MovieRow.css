@@ -1,0 +1,40 @@
+.movie-row {
+  margin-bottom: 2rem;
+}
+
+.movie-row__title {
+  color: white;
+  margin-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+.movie-row__list {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0 2rem;
+  scrollbar-width: none;
+}
+
+.movie-row__list::-webkit-scrollbar {
+  display: none;
+}
+
+.movie-row__item {
+  min-width: 200px;
+  height: 300px;
+  background-color: #2f2f2f;
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.movie-row__item:hover {
+  transform: scale(1.1);
+}
+
+.movie-row__divider {
+  border: none;
+  border-top: 1px solid #444;
+  margin: 1rem 2rem 0 2rem;
+}
