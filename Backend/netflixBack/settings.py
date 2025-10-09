@@ -89,6 +89,8 @@ DATABASES = {
 }
 
 
+AUTH_USER_MODEL = "accounts.User"  # Указываем кастомную модель пользователя
+
 # Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [
     {

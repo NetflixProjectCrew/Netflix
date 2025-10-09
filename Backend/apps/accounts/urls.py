@@ -1,9 +1,13 @@
-#Главный файл маршрутизации проекта
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView 
+from . import views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/v1/", include("accounts.urls")),
-
+    path('register/', views.RegisterView.as_view(), name='register'),  # Регистрация и аутентификация пользователей
+    path('login/', views.LoginView.as_view(), name='login'),  # Регистрация и аутентификация пользователей
+    path('logout/', views.logout_view, name='logout'),  # Выход пользователя
+    path('profile/', views.ProfileView.as_view(), name='profile'),  # Просмотр и обновление профиля пользователя
+    path('change-password/', views.ChangePasswordView.as_view(), name='change_password'),  # Изменение пароля пользователя
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Обновление JWT токена
 ]
+
