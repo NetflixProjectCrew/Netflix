@@ -7,7 +7,7 @@ class User(AbstractUser):
     """Пользовательская модель пользователя, расширяющая AbstractUser."""
 
     username = models.CharField(
-        max_length=150,
+        max_length=50,
         unique=True,
         error_messages={
             'unique': "A user with that username already exists.",
