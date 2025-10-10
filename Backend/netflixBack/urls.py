@@ -1,13 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
-from movie import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+from apps.movies import views
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api/v1/moives', include('movie.urls')),
-    path('', views.home) # 'этот путь предназначался для теста его можно удалить
+    path('api/v1/moives', include('apps.movies.urls')),
 ]
 
 if settings.DEBUG:
