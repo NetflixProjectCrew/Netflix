@@ -2,7 +2,7 @@ venv/
 .pylintrc
 __pycache__/
 
-.vscode
+.vscode/*
 .idea
 .env
 
