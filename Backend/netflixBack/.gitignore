@@ -1,0 +1,49 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Django ---
+db.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.mo
+.env
+.env.*
+
+# --- Virtualenv ---
+venv/
+env/
+ENV/
+.venv/
+
+# --- Media & static ---
+media/
+posters/
+#movies/
+staticfiles/
+static/
+tmp/
+
+# --- VSCode ---
+.vscode/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+venv/
+.pylintrc
+__pycache__/
+
+.vscode
+.idea
+.env
+
+db.sqlite3
+media/
