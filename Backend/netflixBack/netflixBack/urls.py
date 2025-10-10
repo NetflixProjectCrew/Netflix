@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api/', include('movie.urls')),
+    path('api/v1/moives', include('movie.urls')),
     path('', views.home) # 'этот путь предназначался для теста его можно удалить
 ]
 
