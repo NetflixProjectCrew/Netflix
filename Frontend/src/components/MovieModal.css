@@ -1,0 +1,241 @@
+.movie-modal {
+    background-color: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    border: 1px solid var(--border-color);
+    position: relative;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    line-height: 1;
+  }
+  
+  .close-button:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+  
+  .movie-poster {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(135deg, #2f2f2f 0%, #1a1a1a 100%);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .poster-placeholder {
+    color: var(--text-tertiary);
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  
+  .movie-details {
+    margin-bottom: 2rem;
+  }
+  
+  .movie-title {
+    color: var(--text-primary);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .movie-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .movie-year,
+  .movie-rating,
+  .movie-duration {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  
+  .movie-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    text-align: justify;
+  }
+  
+  .movie-genres {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .genre-tag {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+  
+  .movie-cast {
+    text-align: center;
+  }
+  
+  .movie-cast h3 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .movie-cast p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+  
+  .movie-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .play-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .play-button:hover {
+    background-color: var(--accent-hover);
+    transform: scale(1.05);
+  }
+  
+  .trailer-button {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .trailer-button:hover {
+    background-color: var(--border-color);
+    transform: scale(1.05);
+  }
+  
+  .favorite-button {
+    background-color: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .favorite-button:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    transform: scale(1.05);
+  }
+  
+  /* Адаптивность для мобильных */
+  @media (max-width: 768px) {
+    .movie-modal {
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+  
+    .movie-title {
+      font-size: 1.5rem;
+    }
+  
+    .movie-meta {
+      gap: 1rem;
+    }
+  
+    .movie-poster {
+      height: 200px;
+    }
+  
+    .movie-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .play-button,
+    .trailer-button,
+    .favorite-button {
+      width: 100%;
+      max-width: 250px;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .movie-modal {
+      padding: 1rem;
+    }
+  
+    .movie-title {
+      font-size: 1.3rem;
+    }
+  
+    .movie-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+    }
+  }

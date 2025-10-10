@@ -1,6 +1,6 @@
 import './Header.css';
 
-const Header = ({ onSettingsClick, onAccountClick, isLoggedIn, userData }) => {
+const Header = ({ onSettingsClick, onAccountClick, isLoggedIn }) => {
   return (
     <header className="header">
       <h1 className="header__logo">
@@ -22,7 +22,7 @@ const Header = ({ onSettingsClick, onAccountClick, isLoggedIn, userData }) => {
           onClick={onAccountClick}
           title={isLoggedIn ? "Account" : "Login"}
         >
-          {isLoggedIn && userData && (
+          {isLoggedIn && (
             <div className="avatar-indicator"></div>
           )}
         </div>

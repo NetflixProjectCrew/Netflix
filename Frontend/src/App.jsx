@@ -4,6 +4,7 @@ import MovieRow from './components/MovieRow';
 import SettingsModal from './components/SettingsModal';
 import AccountModal from './components/AccountModal';
 import AuthModal from './components/AuthModal';
+import MovieModal from './components/MovieModal';
 import MoviePlayer from './components/MoviePlayer';
 import './App.css';
 
@@ -19,6 +20,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
   const [isMoviePlayerOpen, setIsMoviePlayerOpen] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -58,6 +60,15 @@ function App() {
     }
   };
 
+  const handleMovieClick = () => {
+    setIsMovieModalOpen(true);
+  };
+
+  const handlePlayMovie = () => {
+    setIsMovieModalOpen(false);
+    setIsMoviePlayerOpen(true);
+  };
+
   return (
     <div className={`app ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
       <Header 
@@ -72,7 +83,7 @@ function App() {
           <MovieRow 
             key={index} 
             title={title}
-            onMovieClick={() => setIsMoviePlayerOpen(true)}
+            onMovieClick={handleMovieClick}
           />
         ))}
       </main>
@@ -98,6 +109,14 @@ function App() {
         <AuthModal 
           onClose={() => setIsAuthOpen(false)}
           onLogin={handleLogin}
+          isDarkTheme={isDarkTheme}
+        />
+      )}
+
+      {isMovieModalOpen && (
+        <MovieModal 
+          onClose={() => setIsMovieModalOpen(false)}
+          onPlay={handlePlayMovie}
           isDarkTheme={isDarkTheme}
         />
       )}
