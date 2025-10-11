@@ -1,6 +1,7 @@
 from rest_framework import permissions
 
 
+
 class IsAdminOrReadOnly(permissions.BasePermission):
     """
     Пользователь должен быть администратором для выполнения

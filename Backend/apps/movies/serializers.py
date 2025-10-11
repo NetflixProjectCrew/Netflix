@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils.text import slugify
 from .models import Movie, Genre, Author
-
+from apps.accounts.models import Watched
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для модели жанра фильма"""
@@ -9,8 +9,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ['id', 'name', 'slug', 'films_count']
-        read_only_fields = ['slug', 'films_count']
+        fields = ['id', 'name', 'slug', 'movies_count']
+        read_only_fields = ['slug', 'movies_count']
 
     def get_movies_count(self, obj):
         return obj.movies.count()
@@ -43,7 +43,8 @@ class AuthorSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
     genres = serializers.StringRelatedField(many=True)
-    likes = serializers.ReadOnlyField()
+    likes = serializers.SerializerMethodField()
+
     views = serializers.ReadOnlyField()
 
     class Meta:
@@ -55,12 +56,45 @@ class MovieSerializer(serializers.ModelSerializer):
             ]
         read_only_fields = ['slug', 'author','likes', 'views']
     
+    def get_likes(self, obj):
+        request = self.context.get('request')
+        return {
+            'count': obj.favorite_set.count(),
+            'is_liked': obj.favorite_set.filter(
+                user=request.user
+            ).exists() if request and request.user.is_authenticated else False
+        }
+    
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
         if len(data['description']) > 50:
             data['description'] = data['description'][:50] + '...'
         return data
+    
+    def get_user_progress(self, obj):
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            return None # если не аутентифицирован, то прогресса нет
+        
+        w = (
+            Watched.objects.filter(user=user, movie=obj)
+            .only(
+            'last_position_sec','duration_sec','progress_percent','finished'
+            )
+            .first() # если не смотрел, то None
+        )
+
+        if not w:
+            return None
+        
+        return {
+            'position_sec': w.last_position_sec,
+            'duration_sec': w.duration_sec,
+            'progress_percent': w.progress_percent,
+            'finished': w.finished,
+        }
+
 
 
 class MovieDetailSerializer(serializers.ModelSerializer):
@@ -75,7 +109,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'description', 
             'year', 'poster', 'video', 'likes', 
-            'views', 'author', 'genres'
+            'views', 'author','author_info', 'genres', 'genres_info'
             ]
         read_only_fields = ['slug', 'author','likes', 'views']
     
