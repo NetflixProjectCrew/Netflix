@@ -36,6 +36,8 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "apps.accounts",
     "apps.movies",
+    "apps.subscribe",
+    "apps.payment",
 ]
 
 # Объединяем все приложения в один список, чтобы Django знал обо всех установленных приложениях
