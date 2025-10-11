@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
-
+from django.db.models import F
 
 class Genre(models.Model):
     """Модель жанра фильма"""
@@ -59,7 +59,6 @@ class Movie(models.Model):
     poster = models.ImageField(upload_to='posters/', blank=True, null=True)
     video = models.FileField(upload_to='movies/', blank=True, null=True)
 
-    likes = models.PositiveIntegerField(default=0)
     views = models.PositiveIntegerField(default=0)
     genres = models.ManyToManyField(
         Genre, 
@@ -96,15 +95,10 @@ class Movie(models.Model):
         return reverse("movie-watch", kwargs={"slug": self.slug})
     
     @property
-    def likes_count(self):
-        return self.likes
-    
-    @property
     def views_count(self):
         return self.views
     
 
     def increment_views(self):
         """Метод для увеличения количества просмотров фильма"""
-        self.views += 1
-        self.save(update_fields=['views'])
+        Movie.objects.filter(pk=self.pk).update(views=F('views') + 1)

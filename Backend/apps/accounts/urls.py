@@ -2,6 +2,8 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView 
 from . import views
 
+app_name = 'accounts'
+
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),  # Регистрация и аутентификация пользователей
     path('login/', views.LoginView.as_view(), name='login'),  # Регистрация и аутентификация пользователей
