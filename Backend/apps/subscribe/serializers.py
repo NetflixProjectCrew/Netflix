@@ -101,7 +101,7 @@ class SubscriptionHistorySerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'action']
 
 
-class UserSubscriptionSerializer(serializers.ModelSerializer):
+class UserSubscriptionStatusSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения информации о подписке пользователя в профиле."""
     has_subscription = serializers.BooleanField()
     is_active = serializers.BooleanField()
@@ -121,3 +121,30 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
             'subscription': SubscriptionSerializer(subscription).data if subscription else None,
             'can_watch_movies': is_active,
         }
+    
+
+class WatchMovieSerializer(serializers.Serializer):
+    """Сериализатор для проверки возможности просмотра фильма."""
+    movie_id = serializers.IntegerField()
+
+    def validate_movie_id(self, value):
+        """Валидация ID фильма."""
+        
+        from apps.movies.models import Movie
+
+        try:
+            movie = Movie.objects.get(id=value)
+        except Movie.DoesNotExist:
+            raise serializers.ValidationError("Фильм с таким ID не найден.")
+        
+        return value
+    
+    def validate(self, attrs):
+        user = self.context['request'].user
+
+        if not hasattr(user, 'subscription') or not user.subscription.is_active:
+            raise serializers.ValidationError("У вас нет активной подписки для просмотра фильмов.")
+        
+        return attrs
+    
+

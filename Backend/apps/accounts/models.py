@@ -3,6 +3,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
+from apps.subscribe.models import Subscription
+
+
 class User(AbstractUser):
     """Пользовательская модель пользователя, расширяющая AbstractUser."""
 
@@ -42,9 +45,12 @@ class User(AbstractUser):
         related_name='watchers',  # movie.watchers -> queryset пользователей
         blank=True,
     )
-    # subscription_status
-    # subscription_expiry
-    # subscription_type
+    subscription = models.ForeignKey(
+        Subscription,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+
     # 
 
 
