@@ -1,6 +1,7 @@
+import React from 'react';
 import './Header.css';
 
-const Header = ({ onSettingsClick, onAccountClick, isLoggedIn }) => {
+const Header = ({ onSettingsClick, onAccountClick, isLoggedIn, userData }) => {
   return (
     <header className="header">
       <h1 className="header__logo">
@@ -16,13 +17,15 @@ const Header = ({ onSettingsClick, onAccountClick, isLoggedIn }) => {
           className="header__icon settings" 
           onClick={onSettingsClick}
           title="Settings"
-        ></div>
+        >
+          <span className="settings-icon">⚙️</span>
+        </div>
         <div 
           className="header__icon avatar"
           onClick={onAccountClick}
           title={isLoggedIn ? "Account" : "Login"}
         >
-          {isLoggedIn && (
+          {isLoggedIn && userData && (
             <div className="avatar-indicator"></div>
           )}
         </div>
