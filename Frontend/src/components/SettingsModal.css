@@ -1,215 +1,233 @@
 .settings-modal {
-    background-color: var(--bg-secondary);
-    border-radius: 15px;
-    padding: 2rem;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
-    border: 1px solid var(--border-color);
-  }
-  
-  @keyframes slideUp {
-    from { 
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to { 
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .settings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
-  }
-  
-  .settings-title {
-    color: var(--text-primary);
-    font-size: 1.8rem;
-    margin: 0;
-  }
-  
-  .close-button {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-  }
-  
-  .close-button:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
-  
-  .settings-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  
-  .settings-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .settings-item:last-child {
-    border-bottom: none;
-  }
-  
-  .settings-label {
-    color: var(--text-primary);
-    font-weight: bold;
-    font-size: 1rem;
-  }
-  
-  .settings-select {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    min-width: 120px;
-    font-size: 0.9rem;
-  }
-  
-  .theme-switch {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .theme-label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-  }
-  
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-  }
-  
-  .switch input {
+  background-color: var(--bg-secondary);
+  border-radius: 15px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  border: 1px solid var(--border-color);
+  position: relative; 
+}
+
+@keyframes slideUp {
+  from { 
     opacity: 0;
-    width: 0;
-    height: 0;
+    transform: translateY(30px);
   }
-  
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--bg-tertiary);
-    transition: .4s;
-    border-radius: 24px;
-    border: 1px solid var(--border-color);
+  to { 
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 4px;
-    bottom: 3px;
-    background-color: var(--text-primary);
-    transition: .4s;
-    border-radius: 50%;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  position: relative; 
+}
+
+.settings-title {
+  color: var(--text-primary);
+  font-size: 1.8rem;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  position: absolute; 
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.close-button:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.settings-label {
+  color: var(--text-primary);
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.settings-select {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  min-width: 120px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.theme-switch {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.theme-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-tertiary);
+  transition: .4s;
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 3px;
+  background-color: var(--text-primary);
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--accent-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.settings-footer {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+
+.save-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover {
+  background-color: var(--accent-hover);
+}
+
+.cancel-button {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.cancel-button:hover {
+  background-color: var(--border-color);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .settings-modal {
+    padding: 1.5rem;
+    margin: 1rem;
   }
-  
-  input:checked + .slider {
-    background-color: var(--accent-color);
+
+  .settings-title {
+    font-size: 1.5rem;
   }
-  
-  input:checked + .slider:before {
-    transform: translateX(26px);
+
+  .settings-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
   }
-  
+
   .settings-footer {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    border-top: 1px solid var(--border-color);
-    padding-top: 1.5rem;
+    flex-direction: column;
   }
-  
-  .save-button {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem 1.5rem;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: background-color 0.3s;
-  }
-  
-  .save-button:hover {
-    background-color: var(--accent-hover);
-  }
-  
+
+  .save-button,
   .cancel-button {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 0.8rem 1.5rem;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s;
+    width: 100%;
   }
-  
-  .cancel-button:hover {
-    background-color: var(--border-color);
-  }
-  
-  @media (max-width: 768px) {
-    .settings-modal {
-      padding: 1.5rem;
-      margin: 1rem;
-    }
-  
-    .settings-title {
-      font-size: 1.5rem;
-    }
-  
-    .settings-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.8rem;
-    }
-  
-    .settings-footer {
-      flex-direction: column;
-    }
-  
-    .save-button,
-    .cancel-button {
-      width: 100%;
-    }
-  }
+}

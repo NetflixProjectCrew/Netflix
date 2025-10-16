@@ -1,10 +1,29 @@
+import { useState } from 'react';
 import './SettingsModal.css';
 
 const SettingsModal = ({ onClose, isDarkTheme, onThemeToggle }) => {
+  const [language, setLanguage] = useState('ru');
+  const [videoQuality, setVideoQuality] = useState('auto');
+  const [notifications, setNotifications] = useState(true);
+  const [autoplay, setAutoplay] = useState(true);
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
+  };
+
+  const handleSave = () => {
+    const settings = {
+      language,
+      videoQuality,
+      notifications,
+      autoplay,
+      isDarkTheme
+    };
+    localStorage.setItem('cinemate_settings', JSON.stringify(settings));
+    alert('Настройки сохранены!');
+    onClose();
   };
 
   return (
@@ -34,15 +53,26 @@ const SettingsModal = ({ onClose, isDarkTheme, onThemeToggle }) => {
           
           <div className="settings-item">
             <span className="settings-label">Язык</span>
-            <select className="settings-select">
+            <select 
+              className="settings-select"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
               <option value="ru">Русский</option>
               <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
             </select>
           </div>
 
           <div className="settings-item">
             <span className="settings-label">Качество видео</span>
-            <select className="settings-select">
+            <select 
+              className="settings-select"
+              value={videoQuality}
+              onChange={(e) => setVideoQuality(e.target.value)}
+            >
               <option value="auto">Авто</option>
               <option value="1080p">1080p</option>
               <option value="720p">720p</option>
@@ -53,7 +83,11 @@ const SettingsModal = ({ onClose, isDarkTheme, onThemeToggle }) => {
           <div className="settings-item">
             <span className="settings-label">Уведомления</span>
             <label className="switch">
-              <input type="checkbox" defaultChecked />
+              <input 
+                type="checkbox" 
+                checked={notifications}
+                onChange={(e) => setNotifications(e.target.checked)}
+              />
               <span className="slider"></span>
             </label>
           </div>
@@ -61,14 +95,18 @@ const SettingsModal = ({ onClose, isDarkTheme, onThemeToggle }) => {
           <div className="settings-item">
             <span className="settings-label">Автовоспроизведение</span>
             <label className="switch">
-              <input type="checkbox" defaultChecked />
+              <input 
+                type="checkbox" 
+                checked={autoplay}
+                onChange={(e) => setAutoplay(e.target.checked)}
+              />
               <span className="slider"></span>
             </label>
           </div>
         </div>
 
         <div className="settings-footer">
-          <button className="save-button">Сохранить</button>
+          <button className="save-button" onClick={handleSave}>Сохранить</button>
           <button className="cancel-button" onClick={onClose}>Отмена</button>
         </div>
       </div>
