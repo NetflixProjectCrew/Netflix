@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -17,6 +18,8 @@ from .serializers import (
 )
 
 from apps.movies.models import Movie
+from .services.access import can_user_watch
+from .services.signed_urls import generate_signed_url_for_movie
 
 
 class SubscriptionPlanListView(generics.ListAPIView):
@@ -72,10 +75,56 @@ class SubscriptionHistoryView(generics.ListAPIView):
             return SubscriptionHistory.objects.none()
 
 
-class MovieWatchView(generics.RetrieveAPIView):
-    """Проверка возможности просмотра фильма по подписке"""
-    serializer_class = WatchMovieSerializer
+
+class MovieWatchView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def get(self, request, slug: str):
+        movie = get_object_or_404(Movie, slug=slug)
+        ok, reason, meta = can_user_watch(request.user, movie)
+        if not ok:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        url, expires_at = generate_signed_url_for_movie(movie)
+        return Response({"url": url, "expires_at": expires_at, "meta": meta}, status=200)
 
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def subscription_status(request):
+    serializer = UserSubscriptionStatusSerializer(request.user)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def cancel_subscription(request):
+    """Отмена подписки пользователя"""
+    try:
+        subscription = request.user.subscription
+
+        if not subscription.is_active:
+            return Response({
+                'error': 'У вас нет активной подписки для отмены.'
+                }, status=status.HTTP_400_BAD_REQUEST)
         
+        with transaction.atomic():
+            subscription.cancel()
+
+            SubscriptionHistory.objects.create(
+                subscription=subscription,
+                action='canceled',
+                description='Пользователь отменил подписку.',
+            )
+        return Response({
+            'detail': 'Ваша подписка была успешно отменена и будет действовать до конца оплаченного периода.'
+            }, status=status.HTTP_200_OK)
+    
+    except Subscription.DoesNotExist:
+        return Response({
+            'error': 'У вас нет подписки для отмены.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
