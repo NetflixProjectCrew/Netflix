@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
-import Header from './components/Header';
-import MovieRow from './components/MovieRow';
-import SettingsModal from './components/SettingsModal';
-import AccountModal from './components/AccountModal';
-import AuthModal from './components/AuthModal';
-import MovieModal from './components/MovieModal';
-import MoviePlayer from './components/MoviePlayer';
-import './App.css';
-
+import React, { useState, useEffect } from 'react';  
+import Header from './components/common/Header/Header';
+import MovieRow from './components/common/MovieRow/MovieRow';
+import SettingsModal from './components/modals/SettingsModal/SettingsModal';
+import AccountModal from './components/modals/AccountModal/AccountModal';
+import AuthModal from './components/modals/AuthModal/AuthModal';
+import MovieModal from './components/modals/MovieModal/MovieModal';
+import MoviePlayer from './components/modals/MoviePlayer/MoviePlayer';
+import './App.css';  
 const rowTitles = [
   'Continue Watching',
   'Recommendation for You',

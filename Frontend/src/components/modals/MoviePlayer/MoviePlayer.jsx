@@ -36,7 +36,7 @@ const MoviePlayer = ({ onClose, isDarkTheme }) => {
             {isPlaying ? (
               <div className="playing-video">
                 <div className="video-content">
-                  <h3>Интерстеллар</h3>
+                  <h3>Трансформеры</h3>
                   <p>Сейчас воспроизводится...</p>
                 </div>
               </div>
@@ -45,7 +45,7 @@ const MoviePlayer = ({ onClose, isDarkTheme }) => {
                 <button className="big-play-button" onClick={handlePlayPause}>
                   ▶
                 </button>
-                <h3>Интерстеллар</h3>
+                <h3>Трансформеры</h3>
                 <p>Нажмите для воспроизведения</p>
               </div>
             )}
@@ -87,8 +87,8 @@ const MoviePlayer = ({ onClose, isDarkTheme }) => {
         </div>
 
         <div className="movie-info-fullscreen">
-          <h2>Интерстеллар</h2>
-          <p>2014 · Фантастика, Драма · ⭐ 8.6/10</p>
+          <h2>Трансформеры</h2>
+          <p>2007 · Фантастика, Боевик · ⭐ 7.3/10</p>
         </div>
       </div>
     </div>
