@@ -30,12 +30,15 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "django_filters",
     "rest_framework_simplejwt",
+    "storages",
 ]
 
 # Наши локальные приложения, которые мы создаем для реализации бизнес-логики нашего проекта
 LOCAL_APPS = [
     "apps.accounts",
     "apps.movies",
+    "apps.subscribe",
+    "apps.payment",
 ]
 
 # Объединяем все приложения в один список, чтобы Django знал обо всех установленных приложениях
@@ -193,5 +196,67 @@ LOGGING = {
             "level": "DEBUG", # Уровень логов
             "propagate": True, # Распространяем логи родительским логгерам
         },
+    },
+}
+
+# --- Streaming / Play ---
+STREAM_BACKEND = config("STREAM_BACKEND", default="AZURE")          # AZURE (наш случай)
+STREAM_URL_EXP_SECONDS = config("STREAM_URL_EXP_SECONDS", cast=int, default=900)  # TTL SAS-ссылки, сек
+
+# --- Azure Storage (django-storages) ---
+AZURE_ACCOUNT_NAME = config("AZURE_ACCOUNT_NAME")                     
+ 
+AZURE_ACCOUNT_KEY = config("AZURE_ACCOUNT_KEY", default=None)        # base64-ключ из Access keys
+ 
+AZURE_MEDIA_CONTAINER = config("AZURE_MEDIA_CONTAINER", default="media")   # приватный контейнер для видео/медиа
+
+
+AZURE_BLOB_BASE_URL = config("AZURE_BLOB_BASE_URL")  
+
+# Вариант А: все FileField идут в Azure
+DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+
+# Параметры django-storages для Azure
+AZURE_CONTAINER = AZURE_MEDIA_CONTAINER
+AZURE_SSL = config("AZURE_SSL", cast=bool, default=True)
+AZURE_URL_EXPIRATION_SECS = None               # SAS генерим сами в сервисе, а не через storage
+AZURE_OVERWRITE_FILES = config("AZURE_OVERWRITE_FILES", cast=bool, default=False)
+AZURE_LOCATION = config("AZURE_LOCATION", default="")  # префикс внутри контейнера (не обязательно)
+AZURE_MAX_CONNS = config("AZURE_MAX_CONNS", cast=int, default=2)
+
+# MEDIA_URL удобно собрать отсюда (статич. префикс до ключа файла)
+MEDIA_URL = f"{AZURE_BLOB_BASE_URL}/{AZURE_CONTAINER}/"
+
+
+
+# --- Email (консольный бэкенд для разработки) ---
+
+# URL фронтенда для редиректов из писем (например, для сброса пароля)
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+EMAIL_PORT = config("EMAIL_PORT", cast=int, default=25)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=False)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
+
+# --- Celery ---
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="redis://localhost:6379/0")
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
+
+# --- Celery beat ---
+CELERY_BEAT_SCHEDULE = {
+    "check-expired-subscriptions": {
+        "task": "apps.subscribe.tasks.check_and_update_subscriptions",
+        "schedule": 60 * 60 ,  # Каждый час
+    },
+    "send-subscription-expiry-reminders": {
+        "task": "apps.subscribe.tasks.send_subcription_expiry_reminders",
+        "schedule": 60 * 60 * 24,  # Каждый день
     },
 }

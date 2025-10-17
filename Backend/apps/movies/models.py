@@ -54,6 +54,7 @@ class Movie(models.Model):
 
     title = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
+    
     description = models.TextField()
     year = models.IntegerField()
     poster = models.ImageField(upload_to='posters/', blank=True, null=True)
