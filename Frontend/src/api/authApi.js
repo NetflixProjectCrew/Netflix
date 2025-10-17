@@ -17,7 +17,7 @@ export const authApi = {
 
     const response = await api.post('/api/v1/auth/register/', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
       },
     });
     return response.data;
@@ -54,7 +54,7 @@ export const authApi = {
     return response.data;
   },
 
-  // Обновить профиль (PATCH, не POST!)
+  
   updateProfile: async (data) => {
     const formData = new FormData();
     

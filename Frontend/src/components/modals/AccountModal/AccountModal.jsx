@@ -1,4 +1,5 @@
 import './AccountModal.css';
+import { authApi } from '../../../api/authApi';
 
 const AccountModal = ({ onClose, onLogout, userData, isDarkTheme }) => {
   const handleOverlayClick = (e) => {
@@ -6,6 +7,8 @@ const AccountModal = ({ onClose, onLogout, userData, isDarkTheme }) => {
       onClose();
     }
   };
+  
+  
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>

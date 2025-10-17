@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './AuthModal.css';
+import {authApi} from '../../../api/authApi';
 
 const AuthModal = ({ onClose, onLogin, isDarkTheme }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -46,7 +47,13 @@ const AuthModal = ({ onClose, onLogin, isDarkTheme }) => {
         joinDate: new Date().toLocaleDateString()
       };
       onLogin(userData);
-    }
+      authApi.register({
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        passwordConfirm: formData.confirmPassword
+    })
+    };
   };
 
   const switchMode = () => {
