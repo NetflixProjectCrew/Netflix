@@ -45,10 +45,11 @@ class User(AbstractUser):
         related_name='watchers',  # movie.watchers -> queryset пользователей
         blank=True,
     )
-    subscription = models.ForeignKey(
+    subscription = models.OneToOneField(
         Subscription,
         on_delete=models.SET_NULL,
         null=True,
+        related_name='current_user'
     )
 
     # 

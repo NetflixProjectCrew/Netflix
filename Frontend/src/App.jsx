@@ -37,10 +37,11 @@ function App() {
     setIsDarkTheme(!isDarkTheme);
   };
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userRawData) => {
     setUserData(userData);
     setIsLoggedIn(true);
     setIsAuthOpen(false);
+
     localStorage.setItem('cinemate_user', JSON.stringify(userData));
   };
 
