@@ -233,6 +233,12 @@ MEDIA_URL = f"{AZURE_BLOB_BASE_URL}/{AZURE_CONTAINER}/"
 
 # URL фронтенда для редиректов из писем (например, для сброса пароля)
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+
+# Stripe настройки
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
+
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("EMAIL_PORT", cast=int, default=25)
@@ -258,5 +264,17 @@ CELERY_BEAT_SCHEDULE = {
     "send-subscription-expiry-reminders": {
         "task": "apps.subscribe.tasks.send_subcription_expiry_reminders",
         "schedule": 60 * 60 * 24,  # Каждый день
+    },
+    'cleanup-old-payments': {
+        'task': 'apps.payment.tasks.cleanup_old_payments',
+        'schedule': 604800.0,  # Каждую неделю
+    },
+    'cleanup-old-webhook-events': {
+        'task': 'apps.payment.tasks.cleanup_old_webhook_events',
+        'schedule': 86400.0,  # Каждый день
+    },
+    'retry-failed-webhook-events': {
+        'task': 'apps.payment.tasks.retry_failed_webhook_events',
+        'schedule': 3600.0,  # Каждый час
     },
 }
