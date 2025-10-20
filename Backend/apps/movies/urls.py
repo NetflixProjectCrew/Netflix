@@ -15,6 +15,10 @@ urlpatterns = [
     # Authors
     path('authors/', views.AuthorListCreateView.as_view(), name='author-list-create'),
     path('authors/<slug:slug>/', views.AuthorDetailView.as_view(), name='author-detail'),
+    
+    # Actors
+    path('actors/', views.ActorListCreateView.as_view(), name='actor-list-create'),
+    path('actors/<slug:slug>/', views.ActorDetailView.as_view(), name='actor-detail'),
 
 
     # Movies CRUD 

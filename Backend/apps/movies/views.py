@@ -6,14 +6,15 @@ from django.db import transaction
 from django.db.models import Q, Count
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Movie, Genre, Author
+from .models import Movie, Genre, Author, Actor
 from apps.accounts.models import Watched, Favorite
 from .serializers import (
     MovieSerializer,
     MovieDetailSerializer,
     MovieCreateUpdateSerializer,
     GenreSerializer, 
-    AuthorSerializer
+    AuthorSerializer,
+    ActorSerializer
 )
 from .permissions import IsAdminOrReadOnly
 
@@ -56,6 +57,25 @@ class AuthorDetailView(generics.RetrieveUpdateDestroyAPIView):
     """ API endpoint для конкретного автора фильма """
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
+    lookup_field = 'slug'
+
+
+class ActorListCreateView(generics.ListCreateAPIView):
+    """ API endpoint для актеров фильмов """
+    queryset = Actor.objects.all()
+    serializer_class = ActorSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'bio']
+    ordering_fields = ['name']
+    ordering = ['name']
+
+
+class ActorDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """ API endpoint для конкретного актера фильма """
+    queryset = Actor.objects.all()
+    serializer_class = ActorSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     lookup_field = 'slug'
 

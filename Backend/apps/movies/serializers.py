@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.text import slugify
-from .models import Movie, Genre, Author
+from .models import Movie, Genre, Author, Actor
 from apps.accounts.models import Watched
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -26,6 +26,26 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
+        fields = [
+            'id', 'name', 'slug', 'bio', 'created_at', 
+            'updated_at', 'movies_count'
+            ]
+        read_only_fields = ['slug', 'created_at', 'updated_at', 'movies_count']
+
+    def get_movies_count(self, obj):
+        return obj.movies.count()
+    
+    def create(self, validated_data):
+        validated_data['slug'] = slugify(validated_data['name'])
+        return super().create(validated_data)
+    
+
+class ActorSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели автора фильма"""
+    movies_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Actor
         fields = [
             'id', 'name', 'slug', 'bio', 'created_at', 
             'updated_at', 'movies_count'

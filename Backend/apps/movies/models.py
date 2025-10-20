@@ -22,6 +22,31 @@ class Genre(models.Model):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
+class Actor(models.Model):
+    """Модель актера"""
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
+    bio = models.TextField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='actors/', blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "actors"
+        verbose_name = "Actor"
+        verbose_name_plural = "Actors"
+        ordering = ["name"]
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    
+    def __str__(self):
+        return self.name
+
 
 class Author(models.Model):
     """Модель автора фильма"""

@@ -118,6 +118,14 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # Статические файлы (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
@@ -213,19 +221,20 @@ AZURE_MEDIA_CONTAINER = config("AZURE_MEDIA_CONTAINER", default="media")   # п�
 
 AZURE_BLOB_BASE_URL = config("AZURE_BLOB_BASE_URL")  
 
-# Вариант А: все FileField идут в Azure
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+# # Вариант А: все FileField идут в Azure
+# DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 
 # Параметры django-storages для Azure
 AZURE_CONTAINER = AZURE_MEDIA_CONTAINER
 AZURE_SSL = config("AZURE_SSL", cast=bool, default=True)
-AZURE_URL_EXPIRATION_SECS = None               # SAS генерим сами в сервисе, а не через storage
+AZURE_URL_EXPIRATION_SECS = 3600          
+
 AZURE_OVERWRITE_FILES = config("AZURE_OVERWRITE_FILES", cast=bool, default=False)
 AZURE_LOCATION = config("AZURE_LOCATION", default="")  # префикс внутри контейнера (не обязательно)
 AZURE_MAX_CONNS = config("AZURE_MAX_CONNS", cast=int, default=2)
 
 # MEDIA_URL удобно собрать отсюда (статич. префикс до ключа файла)
-MEDIA_URL = f"{AZURE_BLOB_BASE_URL}/{AZURE_CONTAINER}/"
+# MEDIA_URL = f"{AZURE_BLOB_BASE_URL}/{AZURE_CONTAINER}/"
 
 
 
