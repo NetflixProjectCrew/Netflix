@@ -51,6 +51,13 @@ class Payment(models.Model):
         default='pending',
     )
 
+    payment_method = models.CharField(
+        max_length=20, 
+        choices=PAYMENT_METHOD_CHOICES, 
+        default='stripe'
+    )
+
+
     # Stripe - специфичные поля
     stripe_payment_intent_id = models.CharField(
         max_length=255,
@@ -86,7 +93,7 @@ class Payment(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True,
     )
-    proccessed_at = models.DateTimeField(
+    processed_at = models.DateTimeField(
         null=True,
         blank=True,
     )
@@ -125,17 +132,17 @@ class Payment(models.Model):
         """Отмечает платеж как успешный"""
         from django.utils import timezone
         self.status = 'succeeded'
-        self.proccessed_at = timezone.now()
-        self.save(update_fields=['status', 'proccessed_at'])
+        self.processed_at = timezone.now()
+        self.save(update_fields=['status', 'processed_at'])
     
     def mark_as_failed(self, reason=None):
         """Отмечает платеж как неудачный"""
         from django.utils import timezone
         self.status = 'failed'
-        self.proccessed_at = timezone.now()
+        self.processed_at = timezone.now()
         if reason:
             self.metadata['failure_reason'] = reason
-        self.save(update_fields=['status', 'proccessed_at'])
+        self.save(update_fields=['status', 'processed_at'])
 
 
 class PaymentAttempt(models.Model):

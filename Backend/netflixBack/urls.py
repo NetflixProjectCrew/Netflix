@@ -10,6 +10,7 @@ urlpatterns = [
     path("api/v1/auth/", include("apps.accounts.urls")),
     path('api/v1/movies/', include('apps.movies.urls')),
     path('api/v1/subscribe/', include('apps.subscribe.urls')),
+    path('api/v1/payment/', include('apps.payment.urls')),
 ]
 
 if settings.DEBUG:

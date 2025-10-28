@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import './MoviePlayer.css';
+import { ToastContainer } from 'react-toastify';
 
-const MoviePlayer = ({ onClose, isDarkTheme }) => {
+const MoviePlayer = ({movie, onClose, isDarkTheme }) => {
+  if (!movie){
+    return null
+  }
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(120); 
@@ -28,6 +32,7 @@ const MoviePlayer = ({ onClose, isDarkTheme }) => {
 
   return (
     <div className="modal-overlay movie-player-overlay" onClick={handleOverlayClick}>
+      <ToastContainer />
       <div className="movie-player-fullscreen">
         <button className="close-button-player" onClick={onClose}>×</button>
         
@@ -36,7 +41,7 @@ const MoviePlayer = ({ onClose, isDarkTheme }) => {
             {isPlaying ? (
               <div className="playing-video">
                 <div className="video-content">
-                  <h3>Трансформеры</h3>
+                  <h3>{movie.title}</h3>
                   <p>Сейчас воспроизводится...</p>
                 </div>
               </div>
@@ -45,7 +50,7 @@ const MoviePlayer = ({ onClose, isDarkTheme }) => {
                 <button className="big-play-button" onClick={handlePlayPause}>
                   ▶
                 </button>
-                <h3>Трансформеры</h3>
+                <h3>{movie.title}</h3>
                 <p>Нажмите для воспроизведения</p>
               </div>
             )}
@@ -87,8 +92,13 @@ const MoviePlayer = ({ onClose, isDarkTheme }) => {
         </div>
 
         <div className="movie-info-fullscreen">
-          <h2>Трансформеры</h2>
-          <p>2007 · Фантастика, Боевик · ⭐ 7.3/10</p>
+          <h2>{movie.title}</h2>
+          <p> {movie.year} · 
+            {movie.genres_info? movie.genres_info.map(g => (
+              <span key={g.id} className="genre-tag">{g.name}</span>
+            )) : "нет жанров на бэке"}
+             · 
+             ⭐ 7.3/10</p>
         </div>
       </div>
     </div>

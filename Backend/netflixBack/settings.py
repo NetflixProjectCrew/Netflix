@@ -118,6 +118,14 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # Статические файлы (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
@@ -134,6 +142,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Настройки Django REST Framework
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",  # По умолчанию все запросы разрешены
     ],
@@ -141,7 +152,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",  # Ограничение по количеству запросов для анонимных пользователей
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/hour",  # Максимум 100 запросов в час для анонимных пользователей
+        "anon": "500/hour",  # Максимум 500 запросов в час для анонимных пользователей
     },
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",  # Ответы будут в формате JSON
@@ -164,10 +175,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Время жизни access токена
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Время жизни refresh токена
     'ROTATE_REFRESH_TOKENS': True,                  # Обновляем refresh токен при каждом запросе
+    
     'BLACKLIST_AFTER_ROTATION': True,               # Добавляем старые refresh токены в черный список
     'UPDATE_LAST_LOGIN': True,                      # Обновляем поле last_login при каждом запросе
     'ALGORITHM': 'HS256',                           # Алгоритм шифрования
     'SIGNING_KEY': SECRET_KEY,                      # Ключ для шифрования
+    
     'AUTH_HEADER_TYPES': ('Bearer',),               # Тип заголовка авторизации
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',       # Имя заголовка авторизации
     'USER_ID_FIELD': 'id',                          # Поле пользователя, которое будет использоваться
@@ -213,19 +226,20 @@ AZURE_MEDIA_CONTAINER = config("AZURE_MEDIA_CONTAINER", default="media")   # п�
 
 AZURE_BLOB_BASE_URL = config("AZURE_BLOB_BASE_URL")  
 
-# Вариант А: все FileField идут в Azure
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+# # Вариант А: все FileField идут в Azure
+# DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 
 # Параметры django-storages для Azure
 AZURE_CONTAINER = AZURE_MEDIA_CONTAINER
 AZURE_SSL = config("AZURE_SSL", cast=bool, default=True)
-AZURE_URL_EXPIRATION_SECS = None               # SAS генерим сами в сервисе, а не через storage
+AZURE_URL_EXPIRATION_SECS = 3600          
+
 AZURE_OVERWRITE_FILES = config("AZURE_OVERWRITE_FILES", cast=bool, default=False)
 AZURE_LOCATION = config("AZURE_LOCATION", default="")  # префикс внутри контейнера (не обязательно)
 AZURE_MAX_CONNS = config("AZURE_MAX_CONNS", cast=int, default=2)
 
 # MEDIA_URL удобно собрать отсюда (статич. префикс до ключа файла)
-MEDIA_URL = f"{AZURE_BLOB_BASE_URL}/{AZURE_CONTAINER}/"
+# MEDIA_URL = f"{AZURE_BLOB_BASE_URL}/{AZURE_CONTAINER}/"
 
 
 
@@ -233,6 +247,12 @@ MEDIA_URL = f"{AZURE_BLOB_BASE_URL}/{AZURE_CONTAINER}/"
 
 # URL фронтенда для редиректов из писем (например, для сброса пароля)
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+
+# Stripe настройки
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
+
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("EMAIL_PORT", cast=int, default=25)
@@ -258,5 +278,22 @@ CELERY_BEAT_SCHEDULE = {
     "send-subscription-expiry-reminders": {
         "task": "apps.subscribe.tasks.send_subcription_expiry_reminders",
         "schedule": 60 * 60 * 24,  # Каждый день
+    },
+    'cleanup-old-payments': {
+        'task': 'apps.payment.tasks.cleanup_old_payments',
+        'schedule': 604800.0,  # Каждую неделю
+    },
+    'cleanup-old-webhook-events': {
+        'task': 'apps.payment.tasks.cleanup_old_webhook_events',
+        'schedule': 86400.0,  # Каждый день
+    },
+    'retry-failed-webhook-events': {
+        'task': 'apps.payment.tasks.retry_failed_webhook_events',
+        'schedule': 3600.0,  # Каждый час
+    },
+    "movies-refresh-stale-every-10-min": {
+        "task": "movies.refresh_stale_movies",
+        "schedule": 600.0,                   # каждые 10 минут (в секундах)
+        "args": (60, 100),                   # ttl_minutes=60, limit=100 (пример)
     },
 }
