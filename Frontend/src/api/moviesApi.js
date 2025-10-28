@@ -30,6 +30,21 @@ export const moviesApi = {
     await api.delete(`/api/v1/movies/movies/${slug}/`);
   },
 
+  getMovieCast: async (slug, params = {}) => {
+    const { data } = await api.get(`/api/v1/movies/movies/${slug}/cast/`, { params });
+    return data; // ожидаем [{ id, actor, character, ... }, ...]
+  },
+
+  addMovieCast: async (slug, payload) => {
+    // payload: { actor: <id|slug>, character: <id|slug>, role_name?: string, ... }
+    const { data } = await api.post(`/api/v1/movies/movies/${slug}/cast/`, payload);
+    return data;
+  },
+  
+  deleteMovieCast: async (slug, castId) => {
+    await api.delete(`/api/v1/movies/movies/${slug}/cast/${castId}/`);
+  },
+  
   // Лайкнуть фильм
   likeMovie: async (slug) => {
     const response = await api.post(`/api/v1/movies/movies/${slug}/like/`);

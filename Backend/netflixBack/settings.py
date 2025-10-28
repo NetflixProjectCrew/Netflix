@@ -142,6 +142,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Настройки Django REST Framework
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",  # По умолчанию все запросы разрешены
     ],
@@ -149,7 +152,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",  # Ограничение по количеству запросов для анонимных пользователей
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/hour",  # Максимум 100 запросов в час для анонимных пользователей
+        "anon": "500/hour",  # Максимум 500 запросов в час для анонимных пользователей
     },
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",  # Ответы будут в формате JSON
@@ -172,10 +175,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Время жизни access токена
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Время жизни refresh токена
     'ROTATE_REFRESH_TOKENS': True,                  # Обновляем refresh токен при каждом запросе
+    
     'BLACKLIST_AFTER_ROTATION': True,               # Добавляем старые refresh токены в черный список
     'UPDATE_LAST_LOGIN': True,                      # Обновляем поле last_login при каждом запросе
     'ALGORITHM': 'HS256',                           # Алгоритм шифрования
     'SIGNING_KEY': SECRET_KEY,                      # Ключ для шифрования
+    
     'AUTH_HEADER_TYPES': ('Bearer',),               # Тип заголовка авторизации
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',       # Имя заголовка авторизации
     'USER_ID_FIELD': 'id',                          # Поле пользователя, которое будет использоваться
@@ -285,5 +290,10 @@ CELERY_BEAT_SCHEDULE = {
     'retry-failed-webhook-events': {
         'task': 'apps.payment.tasks.retry_failed_webhook_events',
         'schedule': 3600.0,  # Каждый час
+    },
+    "movies-refresh-stale-every-10-min": {
+        "task": "movies.refresh_stale_movies",
+        "schedule": 600.0,                   # каждые 10 минут (в секундах)
+        "args": (60, 100),                   # ttl_minutes=60, limit=100 (пример)
     },
 }

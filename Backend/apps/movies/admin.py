@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Movie, Genre, Author
+from .models import Movie, Genre, Author, Actor, MovieCharacter, Casting
 
 
 @admin.register(Genre)
@@ -19,9 +19,32 @@ class AuthorAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
 
 
+@admin.register(Actor)
+class ActorAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "created_at", "updated_at")
+    search_fields = ("name", "bio")
+    prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(MovieCharacter)
+class MovieCharacterAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    search_fields = ("name",)
+    prepopulated_fields = {"slug": ("name",)}
+
+
+class CastingInline(admin.TabularInline):
+    model = Casting
+    extra = 1
+    autocomplete_fields = ("actor", "character")
+    fields = ("actor", "character", "credit_order", "is_voice", "is_cameo", "notes")
+    ordering = ("credit_order",)
+
+
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ("title", "year", "author", "views", "poster_preview")
+    list_display = ("title", "year", "author", "views", "poster_preview", "duration")
     list_filter = ("year", "genres", "author")
     search_fields = ("title", "description", "author__name", "genres__name")
     prepopulated_fields = {"slug": ("title",)}
@@ -34,12 +57,14 @@ class MovieAdmin(admin.ModelAdmin):
             "fields": ("title", "slug", "description", "year", "author", "genres")
         }),
         ("Медиа", {
-            "fields": ("poster", "video", "poster_preview"),
+            "fields": ("poster", "video", "duration", "poster_preview"),
         }),
         ("Служебное", {
             "fields": ("views", "created_at", "updated_at"),
         }),
     )
+
+    inlines = [CastingInline]
 
     def poster_preview(self, obj):
         if obj.poster:

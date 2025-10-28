@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';  
-import Header from './components/common/Header/Header';
-import MovieRow from './components/common/MovieRow/MovieRow';
-import SettingsModal from './components/modals/SettingsModal/SettingsModal';
-import AccountModal from './components/modals/AccountModal/AccountModal';
-import AuthModal from './components/modals/AuthModal/AuthModal';
-import MovieModal from './components/modals/MovieModal/MovieModal';
-import MoviePlayer from './components/modals/MoviePlayer/MoviePlayer';
-import './App.css';  
+import Header from './pages/components/common/Header';
+import MovieRow from './pages/components/common/MovieRow/MovieRow';
+import SettingsModal from './pages/components/modals/SettingsModal/SettingsModal';
+import AccountModal from './pages/components/modals/AccountModal/AccountModal';
+import AuthModal from './pages/components/modals/AuthModal/AuthModal';
+import MovieModal from './pages/components/modals/MovieModal/MovieModal';
+import MoviePlayer from './pages/components/modals/MoviePlayer/MoviePlayer';
+import { authApi } from './api/authApi';
+import { moviesApi } from './api/moviesApi';
+import './App.css';
+
 const rowTitles = [
-  'Continue Watching',
-  'Recommendation for You',
-  'Top Detectives of This Year',
-  'Top Thrillers of This Year',
-  'Top Horrors of This Year'
+  { title: 'Continue Watching', type: 'watched' },
+  { title: 'Recommendation for You', type: 'all' },
+  { title: 'Top Movies of This Year', type: 'year' },
+  { title: 'Popular Movies', type: 'popular' }
 ];
 
 function App() {
@@ -24,25 +26,62 @@ function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [selectedSlug, setSelectedSlug] = useState(null);
 
+  // Проверка авторизации при загрузке
   useEffect(() => {
-    const savedUser = localStorage.getItem('cinemate_user');
-    if (savedUser) {
-      setUserData(JSON.parse(savedUser));
-      setIsLoggedIn(true);
-    }
+    checkAuth();
+    loadTheme();
   }, []);
 
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
+  const loadTheme = () => {
+    const savedSettings = localStorage.getItem('cinemate_settings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      setIsDarkTheme(settings.isDarkTheme !== false);
+    }
   };
 
-  const handleLogin = (userRawData) => {
-    setUserData(userData);
+  const checkAuth = async () => {
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+      setIsLoadingUser(false);
+      return;
+    }
+
+    try {
+      const profile = await authApi.getProfile();
+      setUserData(profile);
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      // Токен недействителен - очищаем
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('cinemate_user');
+    } finally {
+      setIsLoadingUser(false);
+    }
+  };
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkTheme;
+    setIsDarkTheme(newTheme);
+    
+    // Сохраняем в настройки
+    const settings = JSON.parse(localStorage.getItem('cinemate_settings') || '{}');
+    settings.isDarkTheme = newTheme;
+    localStorage.setItem('cinemate_settings', JSON.stringify(settings));
+  };
+
+  const handleLogin = (userProfile) => {
+    setUserData(userProfile);
     setIsLoggedIn(true);
     setIsAuthOpen(false);
-
-    localStorage.setItem('cinemate_user', JSON.stringify(userData));
+    localStorage.setItem('cinemate_user', JSON.stringify(userProfile));
   };
 
   const handleLogout = () => {
@@ -50,6 +89,8 @@ function App() {
     setIsLoggedIn(false);
     setIsAccountOpen(false);
     localStorage.removeItem('cinemate_user');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   };
 
   const handleAccountClick = () => {
@@ -60,14 +101,33 @@ function App() {
     }
   };
 
-  const handleMovieClick = () => {
+  const handleMovieClick = (movie, slug) => {
+    setSelectedMovie(movie);
     setIsMovieModalOpen(true);
+    setSelectedSlug(slug);
+
   };
 
   const handlePlayMovie = () => {
     setIsMovieModalOpen(false);
     setIsMoviePlayerOpen(true);
   };
+
+  if (isLoadingUser) {
+    return (
+      <div className={`app ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '100vh',
+          color: 'var(--text-primary)'
+        }}>
+          Загрузка...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`app ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
@@ -79,11 +139,13 @@ function App() {
       />
       
       <main className="main">
-        {rowTitles.map((title, index) => (
+        {rowTitles.map((row, index) => (
           <MovieRow 
             key={index} 
-            title={title}
+            title={row.title}
+            type={row.type}
             onMovieClick={handleMovieClick}
+            isLoggedIn={isLoggedIn}
           />
         ))}
       </main>
@@ -113,16 +175,19 @@ function App() {
         />
       )}
 
-      {isMovieModalOpen && (
+      {isMovieModalOpen && selectedMovie && (
         <MovieModal 
+          movie={selectedMovie}
           onClose={() => setIsMovieModalOpen(false)}
           onPlay={handlePlayMovie}
           isDarkTheme={isDarkTheme}
+          isLoggedIn={isLoggedIn}
         />
       )}
 
-      {isMoviePlayerOpen && (
+      {isMoviePlayerOpen && selectedMovie && (
         <MoviePlayer 
+          movie={selectedMovie}
           onClose={() => setIsMoviePlayerOpen(false)}
           isDarkTheme={isDarkTheme}
         />

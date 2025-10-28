@@ -15,11 +15,7 @@ export const authApi = {
     if (lastName) formData.append('last_name', lastName);
     if (avatar) formData.append('avatar', avatar);
 
-    const response = await api.post('/api/v1/auth/register/', formData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await api.post('/api/v1/auth/register/', formData,);
     return response.data;
   },
 
@@ -63,11 +59,8 @@ export const authApi = {
     if (data.lastName) formData.append('last_name', data.lastName);
     if (data.avatar) formData.append('avatar', data.avatar);
 
-    const response = await api.patch('/api/v1/auth/profile/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.patch('/api/v1/auth/profile/', formData, 
+  );
     return response.data;
   },
 
