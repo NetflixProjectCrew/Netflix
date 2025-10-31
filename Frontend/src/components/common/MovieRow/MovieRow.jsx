@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './MovieRow.css';
-import { moviesApi } from '../../../../api/moviesApi';
+import { moviesApi } from '../../../api/moviesApi';
 import MovieCard from '../MovieCard';
 
 const MovieRow = ({ title, type, onMovieClick, isLoggedIn }) => {

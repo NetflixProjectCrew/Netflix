@@ -15,8 +15,8 @@ html {
   --text-primary: #ffffff;
   --text-secondary: #cccccc;
   --text-tertiary: #888888;
-  --accent-color: #1e90ff;
-  --accent-hover: #0077e6;
+  --accent-color: #ff7b00;
+  --accent-hover: #ff7b00;
   --border-color: #444444;
   --overlay: rgba(0, 0, 0, 0.7);
 }
@@ -28,8 +28,8 @@ html {
   --text-primary: #333333;
   --text-secondary: #666666;
   --text-tertiary: #999999;
-  --accent-color: #1e90ff;
-  --accent-hover: #0077e6;
+  --accent-color: #ff7b00;
+  --accent-hover: #ff7b00;
   --border-color: #dddddd;
   --overlay: rgba(255, 255, 255, 0.7);
 }

@@ -5,7 +5,7 @@ const Header = ({ onSettingsClick, onAccountClick, isLoggedIn, userData }) => {
   return (
     <header className="header">
       <h1 className="header__logo">
-        Cinemate
+        Wanna Watch?
       </h1>
 
       <div className="header__search">

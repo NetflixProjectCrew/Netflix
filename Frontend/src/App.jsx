@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';  
-import Header from './pages/components/common/Header';
-import MovieRow from './pages/components/common/MovieRow/MovieRow';
-import SettingsModal from './pages/components/modals/SettingsModal/SettingsModal';
-import AccountModal from './pages/components/modals/AccountModal/AccountModal';
-import AuthModal from './pages/components/modals/AuthModal/AuthModal';
-import MovieModal from './pages/components/modals/MovieModal/MovieModal';
-import MoviePlayer from './pages/components/modals/MoviePlayer/MoviePlayer';
+import Header from './components/common/Header';
+import MovieRow from './components/common/MovieRow/MovieRow';
+import SettingsModal from './components/modals/SettingsModal/SettingsModal';
+import AccountModal from './components/modals/AccountModal/AccountModal';
+import AuthModal from './components/modals/AuthModal/AuthModal';
+import MovieModal from './components/modals/MovieModal/MovieModal';
+import MoviePlayer from './pages/MoviePlayerPage';
 import { authApi } from './api/authApi';
 import { moviesApi } from './api/moviesApi';
 import './App.css';

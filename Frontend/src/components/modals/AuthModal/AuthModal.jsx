@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './AuthModal.css';
-import { authApi } from '../../../../api/authApi';
+import { authApi } from '../../../api/authApi';
 
 const AuthModal = ({ onClose, onLogin, isDarkTheme }) => {
   const [isLogin, setIsLogin] = useState(true);
