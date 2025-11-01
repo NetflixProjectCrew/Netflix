@@ -201,6 +201,7 @@ LOGGING = {
             "level": "DEBUG", # Уровень логов
             "class": "logging.FileHandler", # Логируем в файл
             "filename": BASE_DIR / "debug.log", # Путь к файлу логов
+            'encoding': 'utf-8',  
         },
     },
     "loggers": {
@@ -246,7 +247,7 @@ AZURE_MAX_CONNS = config("AZURE_MAX_CONNS", cast=int, default=2)
 # --- Email (консольный бэкенд для разработки) ---
 
 # URL фронтенда для редиректов из писем (например, для сброса пароля)
-FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
 
 # Stripe настройки
 STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')

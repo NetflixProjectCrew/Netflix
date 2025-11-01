@@ -52,7 +52,7 @@ class Subscription(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField()
     
-    stripe_subscription_id = models.CharField(max_length=255, unique=True)  # ID подписки в Stripe
+    stripe_subscription_id = models.CharField(max_length=255, unique=True,  null=True, blank=True, default=None )  # ID подписки в Stripe
     auto_renew = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

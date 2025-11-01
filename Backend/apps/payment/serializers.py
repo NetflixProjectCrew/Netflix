@@ -69,8 +69,8 @@ class PaymentCreateSerializer(serializers.Serializer):
         """Общая валидация"""
         user = self.context['request'].user
         
-        # Проверяем, нет ли уже активной подписки
-        if hasattr(user, 'subscription') and user.subscription.is_active:
+        sub = getattr(user, 'subscription', None)   # а не hasattr
+        if sub is not None and getattr(sub, 'is_active', False):
             raise serializers.ValidationError({
                 'non_field_errors': ['User already has an active subscription.']
             })

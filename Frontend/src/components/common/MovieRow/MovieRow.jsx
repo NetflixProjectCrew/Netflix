@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './MovieRow.css';
-import { moviesApi } from '../../../../api/moviesApi';
+import { moviesApi } from '../../../api/moviesApi';
 import MovieCard from '../MovieCard';
 
 const MovieRow = ({ title, type, onMovieClick, isLoggedIn }) => {
@@ -45,10 +45,6 @@ const MovieRow = ({ title, type, onMovieClick, isLoggedIn }) => {
     }
   };
 
-  // Не показываем ряд "Continue Watching" если пользователь не авторизован
-  if (type === 'watched' && !isLoggedIn) {
-    return null;
-  }
 
   return (
     <div className="movie-row">
@@ -67,7 +63,7 @@ const MovieRow = ({ title, type, onMovieClick, isLoggedIn }) => {
       ) : (
         <div className="movie-row__list">
           {movies.map((movie) => (
-            <MovieCard key={movie.slug} movie={movie} onClick={onMovieClick} />
+            <MovieCard key={movie.slug} movie={movie} onClick={() => onMovieClick(movie, movie.slug)} />
           ))}
         </div>
       )}

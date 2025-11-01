@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin.utils import quote
 from django.utils.html import format_html
 from django.urls import reverse
 from django.db.models import Sum
@@ -77,11 +78,17 @@ class PaymentAdmin(admin.ModelAdmin):
 
     def subscription_link(self, obj):
         """Ссылка на подписку"""
-        if obj.subscription:
-            url = reverse('admin:subscribe_subscription_change', args=[obj.subscription.pk])
-            return format_html('<a href="{}">{}</a>', url, obj.subscription.plan.name)
-        return '-'
-    subscription_link.short_description = 'Subscription'
+        if not getattr(obj, 'subscription_id', None):
+            return '—'
+        sub = obj.subscription
+        opts = sub._meta
+        # безопасно формируем имя admin-url из метаданных
+        url = reverse(f'admin:{opts.app_label}_{opts.model_name}_change',
+                      args=(quote(sub.pk),))
+        # что показывать в ссылке — по вкусу
+        return format_html('<a href="{}">#{} — {}</a>', url, sub.pk, sub)
+    subscription_link.short_description = "Subscription"
+    subscription_link.admin_order_field = 'subscription'
 
     def amount_display(self, obj):
         """Отображение суммы"""

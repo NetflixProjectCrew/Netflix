@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Movie, Genre, Author, Actor, MovieCharacter, Casting
 from apps.accounts.models import Watched, Favorite
+from apps.subscribe.services.access import can_user_watch
 from .serializers import (
     MovieSerializer,
     MovieDetailSerializer,
@@ -182,17 +183,32 @@ class MovieActionsViewSet(viewsets.GenericViewSet):
         Favorite.objects.filter(user=request.user, movie=movie).delete()
         return Response({'status': 'unliked'})
 
+
     @action(detail=True, methods=['post'])
     def progress(self, request, slug=None):
         """
-        Body:
-        {
-          "position_sec": 123,
-          "duration_sec": 3600
-        }
+        Сохранение прогресса просмотра.
+        ТРЕБУЕТ АКТИВНУЮ ПОДПИСКУ!
         """
         movie = self.get_object()
+        
+        # Проверяем доступ к просмотру
+        can_watch, reason, meta = can_user_watch(request.user, movie)
+        
+        if not can_watch:
+            error_messages = {
+                'auth_required': 'Authentication required',
+                'subscription_missing': 'Active subscription required',
+                'subscription_inactive': 'Subscription expired',
+            }
+            
+            return Response({
+                'error': error_messages.get(reason, 'Access denied'),
+                'reason': reason,
+                'detail': 'You need an active subscription to watch movies.'
+            }, status=status.HTTP_403_FORBIDDEN)
 
+        # Получение данных из запроса
         position = self._to_nonneg_int(request.data.get('position_sec', 0))
         duration = self._to_nonneg_int(request.data.get('duration_sec', 0))
 

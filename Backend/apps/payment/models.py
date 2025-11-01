@@ -311,11 +311,10 @@ class WebhookEvent(models.Model):
         return f'WebhookEvent {self.provider} - {self.event_type} - Status: {self.status}'
     
     def mark_as_processed(self):
-        """Отмечает событие как обработанное"""
         from django.utils import timezone
-        self.processed = True
+        self.status = 'processed'
         self.processed_at = timezone.now()
-        self.save(update_fields=['processed', 'processed_at'])
+        self.save(update_fields=['status', 'processed_at'])
     
     def mark_as_failed(self, error_message):
         """Отмечает событие как неудачное"""

@@ -12,6 +12,8 @@ urlpatterns = [
     
     # Checkout
     path('create-checkout-session/', views.create_checkout_session, name='create-checkout-session'),
+    path('cancel-pending/', views.cancel_pending_payment, name='cancel_pending_payment'),
+    path('confirm-checkout/', views.confirm_checkout, name='confirm-checkout'),
     
     # Refunds (Admin only)
     path('refunds/', views.RefundListView.as_view(), name='refund-list'),

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import Movie, Genre, Author, Actor, MovieCharacter, Casting
-
+from .tasks import compute_movie_duration, bulk_recompute_durations
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
@@ -44,30 +44,42 @@ class CastingInline(admin.TabularInline):
 
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ("title", "year", "author", "views", "poster_preview", "duration")
-    list_filter = ("year", "genres", "author")
-    search_fields = ("title", "description", "author__name", "genres__name")
-    prepopulated_fields = {"slug": ("title",)}
-    filter_horizontal = ("genres",)  # M2M удобный виджет
-    autocomplete_fields = ("author",)  # быстрый поиск автора
-    readonly_fields = ("views", "created_at", "updated_at", "poster_preview")
+    list_display = (
+        'title', 'year', 'author', 'views', 
+         'poster_preview',
+    )
+    list_filter = ('year', 'genres', 'author', 'meta_dirty')
+    search_fields = ('title', 'description', 'author__name', 'genres__name')
+    prepopulated_fields = {'slug': ('title',)}
+    filter_horizontal = ('genres',)
+    autocomplete_fields = ('author',)
+    readonly_fields = (
+        'views', 'created_at', 'updated_at', 
+        'poster_preview',    
+    )
 
     fieldsets = (
-        ("Основное", {
-            "fields": ("title", "slug", "description", "year", "author", "genres")
+        ('Основное', {
+            'fields': ('title', 'slug', 'description', 'year', 'author', 'genres')
         }),
-        ("Медиа", {
-            "fields": ("poster", "video", "duration", "poster_preview"),
+        ('Медиа', {
+            'fields': (
+                'poster', 'video', 'poster_preview'
+            ),
         }),
-        ("Служебное", {
-            "fields": ("views", "created_at", "updated_at"),
+        ('Служебное', {
+            'fields': ('views', 'created_at', 'updated_at'),
         }),
     )
 
     inlines = [CastingInline]
-
+     
     def poster_preview(self, obj):
         if obj.poster:
-            return format_html('<img src="{}" style="height:60px;border-radius:4px;" />', obj.poster.url)
+            return format_html(
+                '<img src="{}" style="height:60px;border-radius:4px;" />',
+                obj.poster.url
+            )
         return "—"
     poster_preview.short_description = "Постер"
+ 

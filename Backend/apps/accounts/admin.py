@@ -21,4 +21,5 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'username', 'password1', 'password2')}
         ),
     )
+    readonly_fields = ('created_at', 'updated_at')
 
