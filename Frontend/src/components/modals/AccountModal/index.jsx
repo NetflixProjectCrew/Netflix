@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './AccountModal.css';
-import { authApi } from '../../../../api/authApi';
+import { authApi } from '../../../api/authApi';
 
 const AccountModal = ({ onClose, onLogout, userData, isDarkTheme }) => {
   const [isEditing, setIsEditing] = useState(false);

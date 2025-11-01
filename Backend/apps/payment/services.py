@@ -53,51 +53,39 @@ class StripeService:
             return None
         
     @staticmethod
-    def create_checkout_session(payment: Payment, success_url: str, cancel_url:str) -> Optional[dict]:
-        """Создает сессию Stripe Checkout"""
+    def create_checkout_session(payment: Payment, success_url: str, cancel_url: str) -> Optional[dict]:
         try:
-            # Получаем / создаем клиента
             if not payment.stripe_customer_id:
                 customer_id = StripeService.create_customer(payment.user)
                 if customer_id:
                     payment.stripe_customer_id = customer_id
-                    payment.save()
-            
+                    payment.save(update_fields=['stripe_customer_id'])
+
+            plan = payment.subscription.plan  # type: ignore
+            assert hasattr(plan, 'stripe_price_id') and plan.stripe_price_id, "Plan must have stripe_price_id"
+
             session = stripe.checkout.Session.create(
-                customer=payment.stripe_customer_id,    #type: ignore
-                payment_method_types=['card'],
+                customer=payment.stripe_customer_id,  # type: ignore
+                mode='subscription',
                 line_items=[{
-                    'price_data':{
-                        'currency':payment.currency.lower(),
-                        'product_data': {
-                            'name': f"Subscriprion - {payment.subscription.plan.name}", #type: ignore
-                            'description': payment.description, # type: ignore
-                        },
-                        'unit_amount': int(payment.amount * 100), # в центах
-                    },
-                    'quantity':1,
+                    'price': plan.stripe_price_id,
+                    'quantity': 1,
                 }],
-                mode='payment',
                 success_url=success_url,
                 cancel_url=cancel_url,
                 metadata={
-                    'payment_id': payment.id, #type: ignore
+                    'payment_id': payment.id,  # type: ignore
                     'user_id': payment.user.id,
-                    'subscription_id': payment.subscription.id if payment.subscription else None #type: ignore
+                    'subscription_id': payment.subscription.id if payment.subscription else None  # type: ignore
                 }
             )
-
-            # Update payment
-            payment.stripe_session_id = session.id
-            payment.status = 'processing'
-            payment.save()
 
             return {
                 'checkout_url': session.url,
                 'session_id': session.id,
-                'payment_id': payment.id #type: ignore
+                'payment_id': payment.id  # type: ignore
             }
-        except stripe.error.StripeError as e: #type: ignore
+        except stripe.error.StripeError as e:  # type: ignore
             logger.error(f'Error creating checkout session: {e}')
             payment.mark_as_failed(str(e))
             return None
@@ -326,21 +314,26 @@ class WebhookService:
 
     @staticmethod
     def _handle_checkout_completed(event_data: Dict) -> bool:
-        """Обрабатывает завершение checkout сессии"""
         try:
             session = event_data['data']['object']
             metadata = session.get('metadata', {})
             payment_id = metadata.get('payment_id')
-
             if not payment_id:
                 logger.warning("No payment_id in checkout session metadata")
                 return False
 
             payment = Payment.objects.get(id=payment_id)
-            return PaymentService.process_successful_payment(payment)
 
+            # ЕСЛИ это subscription-чекаут, у сессии будет session['subscription']
+            stripe_sub_id = session.get('subscription')
+            if payment.subscription and stripe_sub_id:
+                # ⚠️ Subscription.stripe_subscription_id должен быть nullable=True, default=None
+                payment.subscription.stripe_subscription_id = stripe_sub_id
+                payment.subscription.save(update_fields=['stripe_subscription_id'])
+
+            return PaymentService.process_successful_payment(payment)
         except Payment.DoesNotExist:
-            logger.error(f"Payment not found for checkout session")
+            logger.error("Payment not found for checkout session")
             return False
         except Exception as e:
             logger.error(f"Error handling checkout completed: {e}")
@@ -357,7 +350,7 @@ class WebhookService:
             if not payment_id:
                 logger.warning("No payment_id in payment intent metadata")
                 return False
-
+        
             payment = Payment.objects.get(id=payment_id)
             payment.stripe_payment_intent_id = payment_intent['id']
             payment.save()

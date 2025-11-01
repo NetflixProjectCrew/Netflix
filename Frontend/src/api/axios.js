@@ -48,7 +48,7 @@ axiosInstance.interceptors.response.use(
         // Если refresh не удался - разлогиниваем
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        window.location.href = '/auth';
         return Promise.reject(refreshError);
       }
     }

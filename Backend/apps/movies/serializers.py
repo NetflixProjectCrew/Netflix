@@ -112,30 +112,17 @@ class MovieSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField()
     views = serializers.ReadOnlyField()
     cast = CastingSerializer(many=True, read_only=True)  # <-- добавили состав
-    duration_seconds = serializers.SerializerMethodField()
-    duration_hms = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = Movie
         fields = [
             'id', 'title', 'slug', 'description', 
-            'duration', 'duration_seconds', 'duration_hms',
             'year', 'poster', 'video', 'likes',
             'views', 'author', 'genres', 'cast'
         ]
-        read_only_fields = ['slug', 'author', 'likes', 'views', 'duration']
+        read_only_fields = ['slug', 'author', 'likes', 'views',]
 
-    def get_duration_seconds(self, obj):
-        return int(obj.duration.total_seconds()) if obj.duration else None
-
-    def get_duration_hms(self, obj):
-        if not obj.duration:
-            return None
-        total = int(obj.duration.total_seconds())
-        hh, rem = divmod(total, 3600)
-        mm, ss = divmod(rem, 60)
-        return f"{hh:02d}:{mm:02d}:{ss:02d}"
-
+ 
     def get_likes(self, obj):
         request = self.context.get('request')
         count = getattr(obj, 'favorite_set', None).count() if hasattr(obj, 'favorite_set') else 0 # type: ignore
@@ -143,12 +130,6 @@ class MovieSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated and hasattr(obj, 'favorite_set'):
             is_liked = obj.favorite_set.filter(user=request.user).exists()
         return {'count': count, 'is_liked': is_liked}
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if data.get('description') and len(data['description']) > 50:
-            data['description'] = data['description'][:50] + '...'
-        return data
 
     def get_user_progress(self, obj):
         user = self.context['request'].user
@@ -182,7 +163,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'description',
             'year', 'poster', 'video', 'likes',
             'views', 'author', 'author_info', 'genres', 'genres_info',
-            'cast', 'duration'
+            'cast',
         ]
         read_only_fields = ['slug', 'author', 'likes', 'views']
 

@@ -52,49 +52,91 @@ class PaymentDetailView(generics.RetrieveAPIView):
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def create_checkout_session(request):
-    """Создает Stripe Checkout сессию для оплаты подписки"""
     serializer = PaymentCreateSerializer(data=request.data, context={'request': request})
-    
-    if serializer.is_valid():
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+    plan_id = serializer.validated_data['subscription_plan_id']  # type: ignore
+    plan = get_object_or_404(SubscriptionPlan, id=plan_id, is_active=True)
+
+    success_url = serializer.validated_data.get(  # type: ignore
+        'success_url', f"{settings.FRONTEND_URL}/subscribe?success=1&session_id={{CHECKOUT_SESSION_ID}}"
+    )
+    cancel_url = serializer.validated_data.get(  # type: ignore
+        'cancel_url', f"{settings.FRONTEND_URL}/subscribe?canceled=1"
+    )
+
+    # 1) ищем «висящий» платёж (pending/processing)
+    pending = Payment.objects.filter(
+        user=user, status__in=['pending', 'processing']
+    ).order_by('-created_at').first()
+
+    if pending and pending.stripe_session_id:
+        # Проверим сессию в Stripe: если она ещё "open" — вернём её URL с 409
         try:
-            with transaction.atomic():
-                plan_id = serializer.validated_data['subscription_plan_id'] # type: ignore
-                plan = get_object_or_404(SubscriptionPlan, id=plan_id, is_active=True)
-                
-                # Создаем платеж и подписку
-                payment, subscription = PaymentService.create_subscription_payment(
-                    request.user, plan
-                )
-                
-                # Получаем URLs из запроса
-                success_url = serializer.validated_data.get(# type:ignore
-                    'success_url', 
-                    f"{settings.FRONTEND_URL}/payment/success?session_id={{CHECKOUT_SESSION_ID}}"
-                )
-                cancel_url = serializer.validated_data.get(# type:ignore
-                    'cancel_url', 
-                    f"{settings.FRONTEND_URL}/payment/cancel"
-                )
-                
-                # Создаем Stripe сессию
-                session_data = StripeService.create_checkout_session(
-                    payment, success_url, cancel_url
-                )
-                
-                if session_data:
-                    response_serializer = StripeCheckoutSessionSerializer(session_data)
-                    return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-                else:
-                    return Response({
-                        'error': 'Failed to create checkout session'
-                    }, status=status.HTTP_400_BAD_REQUEST)
-                    
-        except Exception as e:
-            return Response({
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            sess = stripe.checkout.Session.retrieve(pending.stripe_session_id)
+            if sess.get('status') == 'open':
+                return Response({
+                    "detail": "User has pending payments. Please complete or cancel them first.",
+                    "checkout_url": getattr(pending, 'checkout_url', None),  # если ты это поле хранишь
+                    "session_id": pending.stripe_session_id,
+                }, status=status.HTTP_409_CONFLICT)
+        except Exception:
+            pass
+        # иначе снимем блокировку локально
+        pending.status = 'canceled'
+        pending.save(update_fields=['status'])
+
+    # 2) создаём Payment + Subscription (ТОЛЬКО локально) — без внешних вызовов
+    with transaction.atomic():
+        payment, subscription = PaymentService.create_subscription_payment(user, plan)
+
+    # 3) создаём Stripe-сессию (вне atomic)
+    session_data = StripeService.create_checkout_session(payment, success_url, cancel_url)
+    if not session_data:
+        payment.status = 'failed'
+        payment.save(update_fields=['status'])
+        return Response({"error": "Failed to create checkout session"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 4) сохраним данные сессии и отдадим фронту
+    payment.stripe_session_id = session_data['session_id']
+    # если хочешь хранить URL:
+    # payment.checkout_url = session_data['checkout_url']
+    payment.status = 'processing'
+    payment.save(update_fields=['stripe_session_id', 'status'])
+
+    return Response(session_data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def cancel_pending_payment(request):
+    """
+    Отменяет последний pending/processing платёж текущего пользователя
+    и истекает Stripe Checkout Session (если была).
+    """
+    p = (Payment.objects
+         .filter(user=request.user, status__in=['pending', 'processing'])
+         .order_by('-created_at')
+         .first())
+
+    if not p:
+        # Нечего отменять — это ок
+        return Response({"detail": "No pending payment."}, status=status.HTTP_200_OK)
+
+    # Попробуем истечь checkout-сессию (без падений, если уже истекла)
+    if p.stripe_session_id:
+        try:
+            stripe.checkout.Session.expire(p.stripe_session_id)
+        except Exception:
+            pass
+
+    p.status = 'canceled'
+    p.save(update_fields=['status'])
+    return Response({"detail": "Pending payment canceled."}, status=status.HTTP_200_OK)
+
+
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
@@ -111,11 +153,14 @@ def payment_status(request, payment_id):
         if payment.stripe_session_id and payment.status in ['pending', 'processing']:
             session_info = StripeService.retrieve_session(payment.stripe_session_id)
             
-            if session_info:
-                if session_info['status'] == 'complete':
-                    PaymentService.process_successful_payment(payment)
-                elif session_info['status'] == 'failed':
-                    PaymentService.process_failed_payment(payment, "Session failed")
+        if session_info:
+            sess_status = session_info.get('status')           # open|complete|expired
+            pay_status  = session_info.get('payment_status')   # paid|unpaid|no_payment_required
+
+            if pay_status == 'paid':
+                PaymentService.process_successful_payment(payment)
+            elif sess_status == 'expired':
+                PaymentService.process_failed_payment(payment, "Session expired")
         
         response_data = {
             'payment_id': payment.id, # type:ignore
@@ -153,7 +198,7 @@ def cancel_payment(request, payment_id):
                 'error': 'Can only cancel pending payments'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        payment.status = 'cancelled'
+        payment.status = 'canceled'
         payment.save()
         
         # Отменяем подписку
@@ -161,7 +206,7 @@ def cancel_payment(request, payment_id):
             payment.subscription.cancel()
         
         return Response({
-            'message': 'Payment cancelled successfully'
+            'message': 'Payment canceled successfully'
         })
         
     except Payment.DoesNotExist:
@@ -169,6 +214,38 @@ def cancel_payment(request, payment_id):
             'error': 'Payment not found'
         }, status=status.HTTP_404_NOT_FOUND)
     
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def confirm_checkout(request):
+    session_id = request.data.get('session_id')
+    if not session_id:
+        return Response({"detail": "session_id required"}, status=400)
+
+    session = StripeService.retrieve_session(session_id)
+    if not session:
+        return Response({"detail": "Cannot retrieve session"}, status=400)
+
+    # Нормализуем поля
+    sess_status = session.get('status')                 # open|complete|expired
+    pay_status  = session.get('payment_status') or session.get('paymentStatus')  # paid|unpaid|...
+
+    if pay_status != 'paid':
+        return Response({"detail": f"Payment not completed (status={pay_status}, session={sess_status})"}, status=400)
+
+    # Достаём payment_id из metadata (смотри StripeService.create_checkout_session)
+    meta = session.get('metadata') or {}
+    payment_id = meta.get('payment_id')
+    if not payment_id:
+        return Response({"detail": "No payment_id in session metadata"}, status=400)
+
+    payment = get_object_or_404(Payment, id=payment_id, user=request.user)
+
+    ok = PaymentService.process_successful_payment(payment)
+    return Response(
+        {"detail": "Subscription activated" if ok else "Finalize failed"},
+        status=200 if ok else 500
+    )
+
 
 class RefundListView(generics.ListAPIView):
     """Список возвратов для администраторов"""

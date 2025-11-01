@@ -12,5 +12,8 @@ urlpatterns = [
     path('status/', views.subscription_status, name='subscription-status'),
     path('history/', views.SubscriptionHistoryView.as_view(), name='subscription-history'),
     path('cancel/', views.cancel_subscription, name='cancel-subscription'),
-
+    
+    path('movies/<slug:slug>/stream-link/', views.MovieWatchView.as_view(), name='movie-stream-link'),
+    path('movies/<slug:slug>/refresh-stream-link/', views.refresh_stream_link, name='refresh-stream-link'),
+    
 ]

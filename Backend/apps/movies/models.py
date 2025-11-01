@@ -120,7 +120,6 @@ class Movie(models.Model):
     year = models.IntegerField()
     poster = models.ImageField(upload_to='movies/posters/', blank=True, null=True)
     video = models.FileField(upload_to='movies/videos', blank=True, null=True)
-    duration = models.DurationField(null=True, blank=True)
 
     views = models.PositiveIntegerField(default=0)
     genres = models.ManyToManyField(
@@ -171,10 +170,6 @@ class Movie(models.Model):
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
     
-    def needs_meta_refresh(self, ttl_minutes: int = 60) -> bool:
-        if self.meta_dirty or not self.last_meta_update:
-            return True
-        return timezone.now() - self.last_meta_update > timedelta(minutes=ttl_minutes)
 
     def get_absolute_url(self):
         return reverse("movie-watch", kwargs={"slug": self.slug})

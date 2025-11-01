@@ -3,19 +3,25 @@ import api from './axios';
 export const authApi = {
   // Регистрация (с password_confirm!)
   register: async (userData) => {
-    const { username, email, password, passwordConfirm, firstName, lastName, avatar } = userData;
+    const { username, email, password, password_confirm, firstName, lastName, avatar } = userData;
     
     const formData = new FormData();
     formData.append('username', username);
     formData.append('email', email);
     formData.append('password', password);
-    formData.append('password_confirm', passwordConfirm);
+    formData.append('password_confirm', password_confirm);
     
-    if (firstName) formData.append('first_name', firstName);
-    if (lastName) formData.append('last_name', lastName);
-    if (avatar) formData.append('avatar', avatar);
 
-    const response = await api.post('/api/v1/auth/register/', formData,);
+    const response = await api.post('/api/v1/auth/register/',{
+      username,
+      email,
+      password,
+      password_confirm
+    }, 
+    {
+      headers: { "Content-Type": "application/json" }
+    }
+  );
     return response.data;
   },
 
@@ -24,6 +30,8 @@ export const authApi = {
     const response = await api.post('/api/v1/auth/login/', {
       email,   
       password,
+    },{
+      headers: { "Content-Type": "application/json" }
     });
     
     // Сохраняем токены
